@@ -24,7 +24,7 @@ def handle_docs(message):
 def idk(message):
     bot.send_message(message.chat.id, 'Have a question? - /start')
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(content_types=['photo'])
 def issue(message):
     bot.send_message(message.chat.id, 'Hi there you should send me as file NOT AS PHOTO. Got it?')
 
