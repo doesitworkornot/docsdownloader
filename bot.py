@@ -20,5 +20,12 @@ def handle_docs(message):
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_info.file_path)
 
+@bot.message_handler(content_types=['text'])
+def idk(message):
+    bot.send_message(message.chat.id, 'Have a question? - /start')
+
+@bot.message_handler(content_types=['text'])
+def issue(message):
+    bot.send_message(message.chat.id, 'Hi there you should send me as file NOT AS PHOTO. Got it?')
 
 bot.polling()
