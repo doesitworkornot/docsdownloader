@@ -1,6 +1,9 @@
-User Id     Username    First and second
-                            name
-305388788  @tilliknow  Sociable  Username ~
-305388788  @tilliknow  Sociable  Username ~ 
-305388788  @tilliknow  Sociable  Username ~
-305388788  @tilliknow  Sociable  Username ~
+User Id   Mess   Username    First and second
+                                username
+305388788  144  @tilliknow  Sociable  Username ~
+305388788  145  @tilliknow  Sociable  Username ~
+305388788  146  @tilliknow  Sociable  Username ~
+305388788  147  @tilliknow  Sociable  Username ~
+305388788  148  @tilliknow  Sociable  Username ~
+305388788  149  @tilliknow  Sociable  Username ~
+305388788  150  @tilliknow  Sociable  Username ~
