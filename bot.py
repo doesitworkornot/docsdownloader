@@ -31,7 +31,7 @@ def handle_docs(message):
             file_path = 'documents/' + str(message.from_user.id) + str(message.message_id) + str(file_extension)
             link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
             urllib.request.urlretrieve(link, file_path)
-            bot.send_message(message.chat.id, 'Succsess. You did it')
+            bot.send_message(message.chat.id, 'Success. You did it')
 
 
 ############# HELP COMMAND ################
