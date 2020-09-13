@@ -17,7 +17,9 @@ def start(message):
 @bot.message_handler(content_types=["document"])
 def handle_docs(message):
     DB(message)
-    if message.document.thumb == None:                        #Is file too big?
+    if message.document.file_size >= 20971520:
+        print('too big')
+        print(message.document)                    #Is file too big?
         toobig(message)
     else:
         document_id = message.document.file_id
