@@ -65,11 +65,11 @@ def handle_docs(message):
         if file_extension not in cfg.allowedfiles:            #Is file unsupported
             wrong_extension(file_extension, message)
         else:                                                 #User opinion
-            areusure(message)
+            hope(message)
             download(message, file_extension, file_info)
 
 
-def hope()
+def hope(message)
     ############# USER CHECK ################
     def areusure(message):
         keyboard = types.InlineKeyboardMarkup()
@@ -87,7 +87,7 @@ def hope()
     def callback_worker(call):
         return(call.data)
         bot.delete_message(call.message.chat.id, call.message.message_id)
-
+    areusure(message)
     return(call.data)
 
 
