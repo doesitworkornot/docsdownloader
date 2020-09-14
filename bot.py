@@ -69,29 +69,27 @@ def handle_docs(message):
             download(message, file_extension, file_info)
 
 
+def hope()
+    ############# USER CHECK ################
+    def areusure(message):
+        keyboard = types.InlineKeyboardMarkup()
+        key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
+        keyboard.add(key_yes)
+        key_no= types.InlineKeyboardButton(text='No', callback_data='no')
+        keyboard.add(key_no)
+        key_not_one= types.InlineKeyboardButton(text='Not one', callback_data='not_one')
+        keyboard.add(key_not_one)
+        bot.send_message(message.chat.id, text='Are you sure you want to print one copy', reply_markup=keyboard)
 
-############# USER CHECK ################
-def areusure(message):
-    keyboard = types.InlineKeyboardMarkup()
-    key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
-    keyboard.add(key_yes)
-    key_no= types.InlineKeyboardButton(text='No', callback_data='no')
-    keyboard.add(key_no)
-    key_not_one= types.InlineKeyboardButton(text='Not one', callback_data='not_one')
-    keyboard.add(key_not_one)
-    bot.send_message(message.chat.id, text='Are you sure you want to print one copy', reply_markup=keyboard)
 
-
-    ############# DATA CHECK ################
+        ############# DATA CHECK ################
     @bot.callback_query_handler(func=lambda call: True)
     def callback_worker(call):
-        if call.data == 'yes':
-
-        elif call.data == 'not_one':
-            bot.send_message(call.message.chat.id, 'How much?')
-        elif call.data == 'no':
-            bot.send_message(call.message.chat.id, 'Ok then')
+        return(call.data)
         bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    return(call.data)
+
 
 
 ############# DOWNLOAD ################
