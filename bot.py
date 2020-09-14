@@ -103,7 +103,7 @@ def areusure(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == 'yes':
-        global flag                         #Пытаемся в флаги
+        global flag                         #git fix
         flag = True
         print('Флаг сейчас:', flag)
     elif call.data == 'not_one':
