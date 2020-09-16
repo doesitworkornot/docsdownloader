@@ -6,7 +6,6 @@ from telebot import types
 
 bot = telebot.TeleBot(cfg.token)
 
-flag = False
 
 
 '''#########################################################################
@@ -14,20 +13,20 @@ flag = False
 #########################################################################'''
 
 
-############# START COMMAND ################
+    ############# START COMMAND ################
 @bot.message_handler(commands=['start'])
 def start(message):
     hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is downloading all files on my host computer. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored . Nothing personal :). \n \nI hope you'll enjoy"
     bot.send_message(message.chat.id, hi_message)
 
 
-############# HELP COMMAND ################
+    ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])
 def idk(message):
     bot.send_message(message.chat.id, 'Have a question or suggestions? - /start or write to this guy @tilliknow')
 
 
-############# IF PHOTO ################
+    ############# IF PHOTO ################
 @bot.message_handler(content_types=['photo'])
 def issue(message):
     bot.send_message(message.chat.id, 'Am i joke to you?')
@@ -50,27 +49,28 @@ def toobig(message):
 #########################################################################'''
 
 
-
+document_id = ''
+mssg_id = ''
 ############# FILE CHECK ################
 @bot.message_handler(content_types=["document"])
 def handle_docs(message):
     DB(message)
-
     if message.document.file_size >= 20971520:                 #Is file too big?
         toobig(message)
     else:
+        global document_id
+        global mssg_id
+        mssg_id = message.message_id
         document_id = message.document.file_id
         file_info = bot.get_file(document_id)
         useless, file_extension = os.path.splitext(file_info.file_path)
         if file_extension not in cfg.allowedfiles:            #Is file unsupported
             wrong_extension(file_extension, message)
-        else:                                                 #User opinion
-            hope(message)
-            download(message, file_extension, file_info)
+        else:
+            hope(message)                                              #User opinion
 
 
-def hope(message)
-    ############# USER CHECK ################
+def hope(message):
     def areusure(message):
         keyboard = types.InlineKeyboardMarkup()
         key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
@@ -80,24 +80,33 @@ def hope(message)
         key_not_one= types.InlineKeyboardButton(text='Not one', callback_data='not_one')
         keyboard.add(key_not_one)
         bot.send_message(message.chat.id, text='Are you sure you want to print one copy', reply_markup=keyboard)
-
-
-        ############# DATA CHECK ################
-    @bot.callback_query_handler(func=lambda call: True)
-    def callback_worker(call):
-        return(call.data)
-        bot.delete_message(call.message.chat.id, call.message.message_id)
+    def call():
+        @bot.callback_query_handler(func=lambda call: True)
+        def callback_worker(call):
+            bot.delete_message(call.message.chat.id, call.message.message_id)
+            if call.data == 'yes':
+                download(call.message.chat.id)
+            elif call.data == 'no':
+                bot.send_message(call.message.chat.id, 'Ok then')
+                pass
+            elif call.data == 'not_one':
+                bot.send_message(call.message.chat.id, 'And how much?')
+                pass
+            print(call)
     areusure(message)
-    return(call.data)
-
+    call()
 
 
 ############# DOWNLOAD ################
-def download(message, file_extension, file_info):
-    file_path = 'documents/' + str(message.from_user.id) + str(message.message_id) + str(file_extension)
+def download(userid):
+    global document_id
+    global mssg_id
+    file_info = bot.get_file(document_id)
+    useless, file_extension = os.path.splitext(file_info.file_path)
+    file_path = 'documents/' + str(userid) + str(mssg_id) + str(file_extension)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)
-    bot.send_message(message.chat.id, 'Success. You did it')
+    bot.send_message(userid, 'Success. You did it')
 
 
 ############# LOG ################
