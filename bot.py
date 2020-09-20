@@ -44,6 +44,9 @@ def toobig(message):
 
 
 
+
+
+
 '''#########################################################################
                             CHECK AND DOWNLOAD
 #########################################################################'''
@@ -51,6 +54,7 @@ def toobig(message):
 
 document_id = ''
 mssg_id = ''
+copy = 1
 ############# FILE CHECK ################
 @bot.message_handler(content_types=["document"])
 def handle_docs(message):
@@ -79,7 +83,9 @@ def hope(message):
         keyboard.add(key_no)
         key_not_one= types.InlineKeyboardButton(text='Not one', callback_data='not_one')
         keyboard.add(key_not_one)
-        bot.send_message(message.chat.id, text='Are you sure you want to print one copy', reply_markup=keyboard)
+        global copy
+        str4ka= 'Are you sure you want to print one ' + str(copy) + ' copy'
+        bot.send_message(message.chat.id, text=str4ka, reply_markup=keyboard)
     def call():
         @bot.callback_query_handler(func=lambda call: True)
         def callback_worker(call):
@@ -91,22 +97,42 @@ def hope(message):
                 pass
             elif call.data == 'not_one':
                 bot.send_message(call.message.chat.id, 'And how much?')
+                bot.register_next_step_handler(message, how_much)
+                print('my v callback')
                 pass
-            print(call)
     areusure(message)
     call()
+
+
+############# HOW MUCH ################
+def how_much(message):
+    print('my sprashivaem')
+    global copy
+    while copy == 1:
+        try:
+            copy = int(message.text)
+            if copy > 20:
+                bot.send_message(message.chat.id, 'Too much')
+                copy = 1
+        except Exception:
+            bot.send_message(message.chat.id, 'Write in numbers please')
+    hope(message)
+
 
 
 ############# DOWNLOAD ################
 def download(userid):
     global document_id
     global mssg_id
+    global copy
     file_info = bot.get_file(document_id)
     useless, file_extension = os.path.splitext(file_info.file_path)
-    file_path = 'documents/' + str(userid) + str(mssg_id) + str(file_extension)
+    file_path = 'documents/' + str(copy) + '.' + str(userid) + '.' + str(mssg_id) + str(file_extension)
+    print(file_path)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)
     bot.send_message(userid, 'Success. You did it')
+    copy = 1
 
 
 ############# LOG ################
