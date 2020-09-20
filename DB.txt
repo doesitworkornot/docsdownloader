@@ -119,3 +119,6 @@ User Id   Mess   Username    First and second
 305388788  404  @tilliknow  Sociable  Username ~
 305388788  412  @tilliknow  Sociable  Username ~
 305388788  416  @tilliknow  Sociable  Username ~
+837086544  439  @romainzz  RomainzZ  None
+236652929  454  @vk800  Vasily  Kuklin
+236652929  459  @vk800  Vasily  Kuklin

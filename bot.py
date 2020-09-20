@@ -81,10 +81,11 @@ def hope(message):
         keyboard.add(key_yes)
         key_no= types.InlineKeyboardButton(text='No', callback_data='no')
         keyboard.add(key_no)
-        key_not_one= types.InlineKeyboardButton(text='Not one', callback_data='not_one')
-        keyboard.add(key_not_one)
         global copy
-        str4ka= 'Are you sure you want to print one ' + str(copy) + ' copy'
+        not_one_and_how = 'Not ' + str(copy)
+        key_not_one= types.InlineKeyboardButton(text=not_one_and_how, callback_data='not_one')
+        keyboard.add(key_not_one)
+        str4ka= 'Are you sure you want to print ' + str(copy) + ' copy'
         bot.send_message(message.chat.id, text=str4ka, reply_markup=keyboard)
     def call():
         @bot.callback_query_handler(func=lambda call: True)
