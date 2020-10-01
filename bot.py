@@ -2,6 +2,7 @@ import telebot
 import cfg
 import urllib
 import os
+import sqlite3
 from telebot import types
 
 bot = telebot.TeleBot(cfg.token)
@@ -43,6 +44,10 @@ def toobig(message):
     bot.send_message(message.chat.id, 'File is too big :) There\'s no way')
 
 
+############# NEED TO REGISTER ################
+def notalloweduser(message):
+    bot.send_message(message.chat.id, 'You need to login IRL :)')
+
 
 
 
@@ -55,12 +60,23 @@ def toobig(message):
 document_id = ''
 mssg_id = ''
 copy = 1
+
+
+
 ############# FILE CHECK ################
 @bot.message_handler(content_types=["document"])
 def handle_docs(message):
     DB(message)
     if message.document.file_size >= 20971520:                 #Is file too big?
         toobig(message)
+    conn = sqlite3.connect('pplids.sqlite')
+    sql = conn.cursor()
+    sqlstr = "SELECT * FROM ppls WHERE ID = %s"
+    userid = str(message.from_user.id)
+    sql.execute(sqlstr % userid)
+    if sql.fetchone() is None:
+        notalloweduser(message)
+        print('some troubles')
     else:
         global document_id
         global mssg_id
