@@ -76,7 +76,6 @@ def handle_docs(message):
     sql.execute(sqlstr % userid)
     if sql.fetchone() is None:
         notalloweduser(message)
-        print('some troubles')
     else:
         global document_id
         global mssg_id
@@ -123,7 +122,6 @@ def hope(message):
 
 ############# HOW MUCH ################
 def how_much(message):
-    print('my sprashivaem')
     global copy
     while copy == 1:
         try:
