@@ -21,6 +21,27 @@ def start(message):
     bot.send_message(message.chat.id, hi_message)
 
 
+    ############# ADMIN LIST ################
+@bot.message_handler(commands=['userlist'])
+def userlist(message):
+    userid = str(message.from_user.id)
+    conn = sqlite3.connect('pplids.sqlite')
+    sql = conn.cursor()
+    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
+    if sql.fetchone()[0] == 'True':
+        bot.send_message(message.chat.id, 'Ok')
+        sql.execute("SELECT * FROM ppls")
+        res = sql.fetchall()
+        for row in res:
+            bot.send_message(message.chat.id, row)
+
+    elif sql.fetchone()[0] == 'False':
+        bot.send_message(message.chat.id, 'You are not admin')
+    else:
+        bot.send_message(message.chat.id, 'Some problems with access')
+
+
+
     ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])
 def idk(message):
