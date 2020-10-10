@@ -144,14 +144,13 @@ def hope(message):
 ############# HOW MUCH ################
 def how_much(message):
     global copy
-    while copy == 1:
-        try:
-            copy = int(message.text)
-            if copy > 20:
-                bot.send_message(message.chat.id, 'Too much')
-                copy = 1
-        except Exception:
-            bot.send_message(message.chat.id, 'Write in numbers please')
+    try:
+        copy = int(message.text)
+        if copy > 20:
+            bot.send_message(message.chat.id, 'Too much')
+            copy = 1
+    except Exception:
+        bot.send_message(message.chat.id, 'Write in numbers please')
     hope(message)
 
 
