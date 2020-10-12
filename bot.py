@@ -42,6 +42,7 @@ def userlist(message):
 
 
 
+
     ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])
 def idk(message):
@@ -68,6 +69,7 @@ def toobig(message):
 ############# NEED TO REGISTER ################
 def notalloweduser(message):
     bot.send_message(message.chat.id, 'You need to login IRL :)')
+    DB(message)
 
 
 
@@ -87,7 +89,6 @@ copy = 1
 ############# FILE CHECK ################
 @bot.message_handler(content_types=["document"])
 def handle_docs(message):
-    DB(message)
     if message.document.file_size >= 20971520:                 #Is file too big?
         toobig(message)
     conn = sqlite3.connect('pplids.sqlite')
@@ -135,7 +136,6 @@ def hope(message):
             elif call.data == 'not_one':
                 bot.send_message(call.message.chat.id, 'And how much?')
                 bot.register_next_step_handler(message, how_much)
-                print('my v callback')
                 pass
     areusure(message)
     call()
