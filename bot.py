@@ -163,11 +163,23 @@ def download(userid):
     file_info = bot.get_file(document_id)
     useless, file_extension = os.path.splitext(file_info.file_path)
     file_path = 'documents/' + str(copy) + '.' + str(userid) + '.' + str(mssg_id) + str(file_extension)
-    print(file_path)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)
     bot.send_message(userid, 'Success. You did it')
     copy = 1
+    printthat(file_path)
+
+
+
+############# COPY ################
+def printthat(file_path):
+    sum = file_path.split('.')
+    folder = sum[0]
+    quantity = folder[10:]
+    if quantity == '1':
+        print('lp /telebot/' + file_path)
+    else:
+        print('lp -n ' + quantity + ' /telebot/' + file_path)
 
 
 ############# LOG ################
