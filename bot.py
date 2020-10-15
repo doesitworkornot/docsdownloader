@@ -92,7 +92,7 @@ copy = 1
 def handle_docs(message):
     if message.document.file_size >= 20971520:                 #Is file too big?
         toobig(message)
-    conn = sqlite3.connect('pplids.sqlite')
+    conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
     sqlstr = "SELECT * FROM ppls WHERE ID = %s"
     userid = str(message.from_user.id)
@@ -177,12 +177,9 @@ def printthat(file_path):
     sum = file_path.split('.')
     folder = sum[0]
     quantity = folder[10:]
-    if quantity == '1':
-        cmd = 'lp /telebot/' + file_path
-        subprocess.call(cmd)
-    else:
-        cmd = 'lp -n ' + quantity + ' /telebot/' + file_path
-        subprocess.call(cmd)
+    path = '/telebot/' + file_path
+    cmd = ['lp', '-n', quantity, path]
+    subprocess.run(cmd)
 
 
 ############# LOG ################
