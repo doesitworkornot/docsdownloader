@@ -3,6 +3,7 @@ import cfg
 import urllib
 import os
 import sqlite3
+import subprocess
 from telebot import types
 
 bot = telebot.TeleBot(cfg.token)
@@ -146,8 +147,8 @@ def how_much(message):
     global copy
     try:
         copy = int(message.text)
-        if copy > 20:
-            bot.send_message(message.chat.id, 'Too much')
+        if copy > 20 or copy < 1:
+            bot.send_message(message.chat.id, 'Wrong')
             copy = 1
     except Exception:
         bot.send_message(message.chat.id, 'Write in numbers please')
@@ -177,9 +178,11 @@ def printthat(file_path):
     folder = sum[0]
     quantity = folder[10:]
     if quantity == '1':
-        print('lp /telebot/' + file_path)
+        cmd = 'lp /telebot/' + file_path
+        subprocess.call(cmd)
     else:
-        print('lp -n ' + quantity + ' /telebot/' + file_path)
+        cmd = 'lp -n ' + quantity + ' /telebot/' + file_path
+        subprocess.call(cmd)
 
 
 ############# LOG ################
