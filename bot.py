@@ -3,6 +3,7 @@ import cfg
 import urllib
 import os
 import sqlite3
+import subprocess
 from telebot import types
 
 bot = telebot.TeleBot(cfg.token)
@@ -42,6 +43,7 @@ def userlist(message):
 
 
 
+
     ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])
 def idk(message):
@@ -68,6 +70,7 @@ def toobig(message):
 ############# NEED TO REGISTER ################
 def notalloweduser(message):
     bot.send_message(message.chat.id, 'You need to login IRL :)')
+    DB(message)
 
 
 
@@ -87,10 +90,9 @@ copy = 1
 ############# FILE CHECK ################
 @bot.message_handler(content_types=["document"])
 def handle_docs(message):
-    DB(message)
     if message.document.file_size >= 20971520:                 #Is file too big?
         toobig(message)
-    conn = sqlite3.connect('pplids.sqlite')
+    conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
     sqlstr = "SELECT * FROM ppls WHERE ID = %s"
     userid = str(message.from_user.id)
@@ -135,7 +137,6 @@ def hope(message):
             elif call.data == 'not_one':
                 bot.send_message(call.message.chat.id, 'And how much?')
                 bot.register_next_step_handler(message, how_much)
-                print('my v callback')
                 pass
     areusure(message)
     call()
@@ -146,8 +147,8 @@ def how_much(message):
     global copy
     try:
         copy = int(message.text)
-        if copy > 20:
-            bot.send_message(message.chat.id, 'Too much')
+        if copy > 20 or copy < 1:
+            bot.send_message(message.chat.id, 'Wrong')
             copy = 1
     except Exception:
         bot.send_message(message.chat.id, 'Write in numbers please')
@@ -163,11 +164,26 @@ def download(userid):
     file_info = bot.get_file(document_id)
     useless, file_extension = os.path.splitext(file_info.file_path)
     file_path = 'documents/' + str(copy) + '.' + str(userid) + '.' + str(mssg_id) + str(file_extension)
-    print(file_path)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)
     bot.send_message(userid, 'Success. You did it')
     copy = 1
+    printthat(file_path)
+
+
+
+############# COPY ################
+def printthat(file_path):
+    sum = file_path.split('.')
+    folder = sum[0]
+    quantity = folder[10:]
+    path = '/telebot/' + file_path
+    cmd = ['lowriter', '--convert-to', 'pdf', '--outdir', '/telebot/PDF', path]
+    traceback = subprocess.run(cmd, check=True)
+    if traceback.returncode == 0:
+        print('good good')
+    else:
+        print('not good yet:', traceback)
 
 
 ############# LOG ################
