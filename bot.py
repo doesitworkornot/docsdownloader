@@ -178,8 +178,12 @@ def printthat(file_path):
     folder = sum[0]
     quantity = folder[10:]
     path = '/telebot/' + file_path
-    cmd = ['lp', '-n', quantity, path]
-    subprocess.run(cmd)
+    cmd = ['lowriter', '--convert-to', 'pdf', '--outdir', '/telebot/PDF', path]
+    traceback = subprocess.run(cmd, check=True)
+    if traceback.returncode == 0:
+        print('good good')
+    else:
+        print('not good yet:', traceback)
 
 
 ############# LOG ################
