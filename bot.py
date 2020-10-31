@@ -163,27 +163,31 @@ def download(userid):
     global copy
     file_info = bot.get_file(document_id)
     useless, file_extension = os.path.splitext(file_info.file_path)
-    file_path = 'documents/' + str(copy) + '.' + str(userid) + '.' + str(mssg_id) + str(file_extension)
+    file_name = str(copy) + '.' + str(userid) + '.' + str(mssg_id)
+    file_path = '/telebot/documents/' + file_name + str(file_extension)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)
     bot.send_message(userid, 'Success. You did it')
     copy = 1
-    printthat(file_path)
+    printthat(file_path, file_name)
 
 
 
 ############# COPY ################
-def printthat(file_path):
+def printthat(file_path, file_name):
     sum = file_path.split('.')
     folder = sum[0]
     quantity = folder[10:]
-    path = '/telebot/' + file_path
-    cmd = ['lowriter', '--convert-to', 'pdf', '--outdir', '/telebot/PDF', path]
+    cmd = ['lowriter', '--convert-to', 'pdf', '--outdir', '/telebot/PDF', file_path]
     traceback = subprocess.run(cmd, check=True)
     if traceback.returncode == 0:
         print('good good')
+        pdf_file_path = '/telebot/PDF/' + file_name + '.pdf'
+        traceback = subprocess.run(['pdfinfo', pdf_file_path], stdout=subprocess.PIPE, encoding='utf-8')
+        print(traceback)
     else:
         print('not good yet:', traceback)
+
 
 
 ############# LOG ################
