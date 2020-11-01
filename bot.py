@@ -90,6 +90,7 @@ def notalloweduser(message):                            #When user is not regist
 document_id = ''
 mssg_id = ''
 copy = 1
+chat_id = ''
 
 
 ############# FILE CHECK ################
@@ -107,6 +108,8 @@ def handle_docs(message):
     else:
         global document_id
         global mssg_id
+        global chat_id
+        chat_id = message.chat.id
         mssg_id = message.message_id
         document_id = message.document.file_id
         file_info = bot.get_file(document_id)
@@ -114,12 +117,12 @@ def handle_docs(message):
         if file_extension not in cfg.allowedfiles:            #Is file unsupported
             wrong_extension(file_extension, message)
         else:
-            hope(message)                                              #User opinion
+            download()                                              #User opinion
 
 
 ############# CALLBACK AND Q TO USER ################
-def hope(message):
-    def areusure(message):
+def hope(number_of_pages):
+    def areusure(number_of_pages):
         keyboard = types.InlineKeyboardMarkup()
         key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
         keyboard.add(key_yes)
@@ -129,22 +132,29 @@ def hope(message):
         not_one_and_how = 'Not ' + str(copy)
         key_not_one= types.InlineKeyboardButton(text=not_one_and_how, callback_data='not_one')
         keyboard.add(key_not_one)
-        str4ka= 'Are you sure you want to print ' + str(copy) + ' copy'
-        bot.send_message(message.chat.id, text=str4ka, reply_markup=keyboard)
+        if number_of_pages == 1:
+            bot.send_message(chat_id, 'In your file 1 page')
+        else:
+            bot.send_message(chat_id, 'in your file %s pages' % number_of_pages)
+        x = str(number_of_pages * copy)
+        str4ka= 'Are you sure you want to print ' + str(copy) + ' copy. Total' + x + 'pages of paper will be used'
+        global chat_id
+        if x > 20:
+            bot.send_message(chat_id, 'Thats too much, change the file')
+        else:
+            bot.send_message(chat_id, text=str4ka, reply_markup=keyboard)
     def call():
         @bot.callback_query_handler(func=lambda call: True)
         def callback_worker(call):
             bot.delete_message(call.message.chat.id, call.message.message_id)
             if call.data == 'yes':
-                download(call.message.chat.id)
+                print('Тут должен быть вызов на печать')
             elif call.data == 'no':
                 bot.send_message(call.message.chat.id, 'Ok then')
-                pass
             elif call.data == 'not_one':
                 bot.send_message(call.message.chat.id, 'And how much?')
                 bot.register_next_step_handler(message, how_much)
-                pass
-    areusure(message)   #Making Inline Keyboard
+    areusure(number_of_pages)   #Making Inline Keyboard
     call()              #Cheking callback data
 
 
@@ -162,17 +172,18 @@ def how_much(message):
 
 
 ############# DOWNLOAD ################
-def download(userid):
+def download():
     global document_id
     global mssg_id
     global copy
+    global chat_id
     file_info = bot.get_file(document_id)     #Getting sended file info
     useless, file_extension = os.path.splitext(file_info.file_path)
-    file_name = str(copy) + '.' + str(userid) + '.' + str(mssg_id)
+    file_name = str(copy) + '.' + str(chat_id) + '.' + str(mssg_id)
     file_path = '/telebot/documents/' + file_name + str(file_extension)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)         #File downloaded
-    bot.send_message(userid, 'Success. You did it')
+    bot.send_message(chat_id, 'Success. You did it')
     copy = 1
     convertthat(file_path, file_name)           #Sending just downloaded file to LibreOffice
 
@@ -184,7 +195,8 @@ def convertthat(file_path, file_name):
     if traceback.returncode == 0:
         pdf_file_path = '/telebot/PDF/' + file_name + '.pdf'
         cmd_line = 'pdfinfo ' + pdf_file_path + ' | grep Pages | awk \'{print$2}\''
-        traceback = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]   #Number of pages is finally there
+        number_of_pages = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]   #Number of pages is finally there
+        hope(number_of_pages)
     else:                   #Non zero val == Err
         print('not good yet:', traceback)
 
