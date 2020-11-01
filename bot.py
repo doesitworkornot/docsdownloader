@@ -16,12 +16,12 @@ bot = telebot.TeleBot(cfg.token)
 #########################################################################'''
 
 
+
     ############# START COMMAND ################
 @bot.message_handler(commands=['start'])
 def start(message):
     hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is downloading all files on my host computer. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored . Nothing personal :). \n \nI hope you'll enjoy"
     bot.send_message(message.chat.id, hi_message)
-
 
 
     ############# ADMIN LIST ################
@@ -43,12 +43,10 @@ def userlist(message):
         bot.send_message(message.chat.id, 'Some problems with access')
 
 
-
     ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])
 def idk(message):
     bot.send_message(message.chat.id, 'Have a question or suggestions? - /start or write to this guy @tilliknow')
-
 
 
 
@@ -58,12 +56,10 @@ def idk(message):
 
 
 
-
     ############# IF PHOTO ################
 @bot.message_handler(content_types=['photo'])
 def issue(message):
     bot.send_message(message.chat.id, 'Am i joke to you?')
-
 
 
 ############# NOT SUPPORTS ################
@@ -72,11 +68,9 @@ def wrong_extension(file_extension, message):
     bot.send_message(message.chat.id, wrong_message)
 
 
-
 ############# TOO BIG ################
 def toobig(message):
     bot.send_message(message.chat.id, 'File is too big :) There\'s no way')
-
 
 
 ############# NEED TO REGISTER ################
@@ -87,11 +81,9 @@ def notalloweduser(message):
 
 
 
-
 '''#########################################################################
                             CHECK SUBMIT AND DOWNLOAD
 #########################################################################'''
-
 
 
 
@@ -99,7 +91,6 @@ def notalloweduser(message):
 document_id = ''
 mssg_id = ''
 copy = 1
-
 
 
 ############# FILE CHECK ################
@@ -125,7 +116,6 @@ def handle_docs(message):
             wrong_extension(file_extension, message)
         else:
             hope(message)                                              #User opinion
-
 
 
 ############# CALLBACK AND Q TO USER ################
@@ -159,7 +149,6 @@ def hope(message):
     call()
 
 
-
 ############# HOW MUCH ################
 def how_much(message):
     global copy
@@ -171,7 +160,6 @@ def how_much(message):
     except Exception:
         bot.send_message(message.chat.id, 'Write in numbers please')
     hope(message)
-
 
 
 ############# DOWNLOAD ################
@@ -190,7 +178,6 @@ def download(userid):
     printthat(file_path, file_name)
 
 
-
 ############# COPY CONVERT AND NUMBER OF PAGES ################
 def printthat(file_path, file_name):
     sum = file_path.split('.')
@@ -207,14 +194,12 @@ def printthat(file_path, file_name):
         print('not good yet:', traceback)
 
 
-
 ############# LOG ################
 def DB(message):
     log = open('DB.txt', 'a')
     newstr = str(message.from_user.id) + '  ' + str(message.message_id) + '  ' + '@' + str(message.from_user.username) +  '  ' + str(message.from_user.first_name) + '  ' + str(message.from_user.last_name)
     log.write(newstr+'\n')
     log.close()
-
 
 
 ############# JUST VIBING ################
