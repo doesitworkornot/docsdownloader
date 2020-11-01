@@ -12,7 +12,7 @@ bot = telebot.TeleBot(cfg.token)
 
 
 '''#########################################################################
-                        ANSWERS AND OTHER
+                        COMMANDS
 #########################################################################'''
 
 
@@ -36,12 +36,10 @@ def userlist(message):
         res = sql.fetchall()
         for row in res:
             bot.send_message(message.chat.id, row)
-
     elif sql.fetchone()[0] == 'False':
         bot.send_message(message.chat.id, 'You are not admin')
     else:
         bot.send_message(message.chat.id, 'Some problems with access')
-
 
 
 
@@ -51,10 +49,20 @@ def idk(message):
     bot.send_message(message.chat.id, 'Have a question or suggestions? - /start or write to this guy @tilliknow')
 
 
+
+
+'''#########################################################################
+                        ANSWERS TO DEAR USER
+#########################################################################'''
+
+
+
+
     ############# IF PHOTO ################
 @bot.message_handler(content_types=['photo'])
 def issue(message):
     bot.send_message(message.chat.id, 'Am i joke to you?')
+
 
 
 ############# NOT SUPPORTS ################
@@ -63,9 +71,11 @@ def wrong_extension(file_extension, message):
     bot.send_message(message.chat.id, wrong_message)
 
 
+
 ############# TOO BIG ################
 def toobig(message):
     bot.send_message(message.chat.id, 'File is too big :) There\'s no way')
+
 
 
 ############# NEED TO REGISTER ################
@@ -78,10 +88,11 @@ def notalloweduser(message):
 
 
 '''#########################################################################
-                            CHECK AND DOWNLOAD
+                            CHECK SUBMIT AND DOWNLOAD
 #########################################################################'''
 
 
+############# GLOBAL UNITS ################
 document_id = ''
 mssg_id = ''
 copy = 1
@@ -113,6 +124,8 @@ def handle_docs(message):
             hope(message)                                              #User opinion
 
 
+
+############# CALLBACK AND Q TO USER ################
 def hope(message):
     def areusure(message):
         keyboard = types.InlineKeyboardMarkup()
@@ -141,6 +154,7 @@ def hope(message):
                 pass
     areusure(message)
     call()
+
 
 
 ############# HOW MUCH ################
@@ -174,7 +188,7 @@ def download(userid):
 
 
 
-############# COPY ################
+############# COPY CONVERT AND NUMBER OF PAGES ################
 def printthat(file_path, file_name):
     sum = file_path.split('.')
     folder = sum[0]
@@ -182,13 +196,10 @@ def printthat(file_path, file_name):
     cmd = ['lowriter', '--convert-to', 'pdf', '--outdir', '/telebot/PDF', file_path]
     traceback = subprocess.run(cmd, check=True)
     if traceback.returncode == 0:
-        print('good good')
         pdf_file_path = '/telebot/PDF/' + file_name + '.pdf'
         cmd_line = 'pdfinfo ' + pdf_file_path + ' | grep Pages | awk \'{print$2}\''
-        print(cmd_line)
         cmd_ready = shlex.split(cmd_line)
         traceback = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
-        print('Ответ:', traceback)
     else:
         print('not good yet:', traceback)
 
@@ -202,4 +213,6 @@ def DB(message):
     log.close()
 
 
+
+############# JUST VIBING ################
 bot.polling()
