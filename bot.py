@@ -4,6 +4,7 @@ import urllib
 import os
 import sqlite3
 import subprocess
+import shlex
 from telebot import types
 
 bot = telebot.TeleBot(cfg.token)
@@ -183,8 +184,11 @@ def printthat(file_path, file_name):
     if traceback.returncode == 0:
         print('good good')
         pdf_file_path = '/telebot/PDF/' + file_name + '.pdf'
-        traceback = subprocess.run(['pdfinfo', pdf_file_path], stdout=subprocess.PIPE, encoding='utf-8')
-        print(traceback)
+        cmd_line = 'pdfinfo ' + pdf_file_path + ' | grep Pages | awk \'{print$2}\''
+        print(cmd_line)
+        cmd_ready = shlex.split(cmd_line)
+        traceback = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]
+        print('Ответ:', traceback)
     else:
         print('not good yet:', traceback)
 
