@@ -91,6 +91,7 @@ document_id = ''
 mssg_id = ''
 copy = 1
 chat_id = ''
+number_of_pages = 1
 
 
 ############# FILE CHECK ################
@@ -121,24 +122,26 @@ def handle_docs(message):
 
 
 ############# CALLBACK AND Q TO USER ################
-def hope(number_of_pages):
-    def areusure(number_of_pages):
+def hope():
+    def areusure():
+        global number_of_pages
         keyboard = types.InlineKeyboardMarkup()
         key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
         keyboard.add(key_yes)
         key_no= types.InlineKeyboardButton(text='No', callback_data='no')
         keyboard.add(key_no)
         global copy
+        global chat_id
         not_one_and_how = 'Not ' + str(copy)
         key_not_one= types.InlineKeyboardButton(text=not_one_and_how, callback_data='not_one')
         keyboard.add(key_not_one)
+        print('last check:', number_of_pages)
         if number_of_pages == 1:
             bot.send_message(chat_id, 'In your file 1 page')
         else:
-            bot.send_message(chat_id, 'in your file %s pages' % number_of_pages)
-        x = str(number_of_pages * copy)
-        str4ka= 'Are you sure you want to print ' + str(copy) + ' copy. Total' + x + 'pages of paper will be used'
-        global chat_id
+            bot.send_message(chat_id, 'in your file %s pages' % str(number_of_pages))
+        x = int(number_of_pages) * copy
+        str4ka= 'Are you sure you want to print ' + str(copy) + ' copy. Total ' + str(x) + ' pages of paper will be used'
         if x > 20:
             bot.send_message(chat_id, 'Thats too much, change the file')
         else:
@@ -148,13 +151,14 @@ def hope(number_of_pages):
         def callback_worker(call):
             bot.delete_message(call.message.chat.id, call.message.message_id)
             if call.data == 'yes':
+                bot.send_message(chat_id, 'Success. You did it')
                 print('Тут должен быть вызов на печать')
             elif call.data == 'no':
                 bot.send_message(call.message.chat.id, 'Ok then')
             elif call.data == 'not_one':
                 bot.send_message(call.message.chat.id, 'And how much?')
-                bot.register_next_step_handler(message, how_much)
-    areusure(number_of_pages)   #Making Inline Keyboard
+                bot.register_next_step_handler(call.message, how_much)
+    areusure()   #Making Inline Keyboard
     call()              #Cheking callback data
 
 
@@ -168,7 +172,8 @@ def how_much(message):
             copy = 1
     except Exception:
         bot.send_message(message.chat.id, 'Write in numbers please')
-    hope(message)               #Calling Inline Keyboard to ask again after checking number of copies
+    print('First check:', copy)
+    hope()               #Calling Inline Keyboard to ask again after checking number of copies
 
 
 ############# DOWNLOAD ################
@@ -179,11 +184,10 @@ def download():
     global chat_id
     file_info = bot.get_file(document_id)     #Getting sended file info
     useless, file_extension = os.path.splitext(file_info.file_path)
-    file_name = str(copy) + '.' + str(chat_id) + '.' + str(mssg_id)
+    file_name = str(chat_id) + '.' + str(mssg_id)
     file_path = '/telebot/documents/' + file_name + str(file_extension)
     link = 'https://api.telegram.org/file/bot' + cfg.token + '/' + str(file_info.file_path)
     urllib.request.urlretrieve(link, file_path)         #File downloaded
-    bot.send_message(chat_id, 'Success. You did it')
     copy = 1
     convertthat(file_path, file_name)           #Sending just downloaded file to LibreOffice
 
@@ -193,10 +197,12 @@ def convertthat(file_path, file_name):
     cmd = ['lowriter', '--convert-to', 'pdf', '--outdir', '/telebot/PDF', file_path]
     traceback = subprocess.run(cmd, check=True)             #Converting file to PDF so printer can print that
     if traceback.returncode == 0:
+        global number_of_pages
         pdf_file_path = '/telebot/PDF/' + file_name + '.pdf'
         cmd_line = 'pdfinfo ' + pdf_file_path + ' | grep Pages | awk \'{print$2}\''
         number_of_pages = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]   #Number of pages is finally there
-        hope(number_of_pages)
+        number_of_pages = int(number_of_pages)
+        hope()
     else:                   #Non zero val == Err
         print('not good yet:', traceback)
 
