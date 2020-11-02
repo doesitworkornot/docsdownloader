@@ -45,7 +45,7 @@ def userlist(message):
     ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])         #When user writes /help to bot
 def idk(message):
-    bot.send_message(message.chat.id, 'Soo.. Hello there! Lets strart with /start \n **/start** - command that have a description inside can make you understand bot destination \n **/help** - now you here \n **/userlist** - thats showing names of registred users ADMIN STATUS REQUIRED \n Have a suggestions or need to add new type of file? write to this guy @tilliknow')
+    bot.send_message(message.chat.id, 'Soo.. Hello there! Lets strart with /start \n /start - command that have a description inside can make you understand bot destination \n /help - now you here \n /userlist - thats showing names of registred users ADMIN STATUS REQUIRED \n Have a suggestions or need to add new type of file? write to this guy @tilliknow')
 
 
 
