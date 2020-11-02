@@ -19,7 +19,7 @@ bot = telebot.TeleBot(cfg.token)
     ############# START COMMAND ################
 @bot.message_handler(commands=['start'])            #When user writes /start to bot
 def start(message):
-    hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is downloading all files on my host computer. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored . Nothing personal :). \n \nI hope you'll enjoy"
+    hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is checking all files and printing them in the scool. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored. Nothing personal :) Thats Telegram restriction. \n     You can print only 20 pages of paper, so check it before sending the file and make sure that you understand what are you printing.\n Before you need to register that helps us to know who are using scool paper. To start you just need to send file to bot thats all. To see commands list send /help  \n \nI hope you'll enjoy"
     bot.send_message(message.chat.id, hi_message)
 
 
@@ -31,21 +31,21 @@ def userlist(message):
     sql = conn.cursor()
     sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
     if sql.fetchone()[0] == 'True':                 #Admin check with DB
-        bot.send_message(message.chat.id, 'Ok')
+        bot.send_message(message.chat.id, 'Ok there is names of users soo')
         sql.execute("SELECT * FROM ppls")
         res = sql.fetchall()
         for row in res:
             bot.send_message(message.chat.id, row)
     elif sql.fetchone()[0] == 'False':
-        bot.send_message(message.chat.id, 'You are not admin')
+        bot.send_message(message.chat.id, 'You are not admin. So make your bet to solve this problem')
     else:
-        bot.send_message(message.chat.id, 'Some problems with access')
+        bot.send_message(message.chat.id, 'Some problems with access idk what to do')
 
 
     ############# HELP COMMAND ################
 @bot.message_handler(commands=['help'])         #When user writes /help to bot
 def idk(message):
-    bot.send_message(message.chat.id, 'Have a question or suggestions? - /start or write to this guy @tilliknow')
+    bot.send_message(message.chat.id, 'Soo.. Hello there! Lets strart with /start \n **/start** - command that have a description inside can make you understand bot destination \n **/help** - now you here \n **/userlist** - thats showing names of registred users ADMIN STATUS REQUIRED \n Have a suggestions or need to add new type of file? write to this guy @tilliknow')
 
 
 
@@ -58,23 +58,23 @@ def idk(message):
     ############# IF PHOTO ################
 @bot.message_handler(content_types=['photo'])           #When user sends photo to bot
 def issue(message):
-    bot.send_message(message.chat.id, 'Am i joke to you?')
+    bot.send_message(message.chat.id, 'Am i joke to you? You should send me FILE')
 
 
 ############# NOT SUPPORTS ################
 def wrong_extension(file_extension, message):           #When user sends file with wrong extension
-    wrong_message = 'Sorry but '+file_extension+' type file doesnt supports. Try other filetype'
+    wrong_message = 'Sorry but '+file_extension+' type file doesnt supports. Try other filetype or if you think that this is needed format you shold write to admin user'
     bot.send_message(message.chat.id, wrong_message)
 
 
 ############# TOO BIG ################
 def toobig(message):                                    #When user sends too big file
-    bot.send_message(message.chat.id, 'File is too big :) There\'s no way')
+    bot.send_message(message.chat.id, 'File is too big :) There\'s no way Telegram can\'t allow us to download this file')
 
 
 ############# NEED TO REGISTER ################
 def notalloweduser(message):                            #When user is not registred in DB
-    bot.send_message(message.chat.id, 'You need to login IRL :)')
+    bot.send_message(message.chat.id, 'You need to login IRL :) Just check /start command')
     DB(message)
 
 
@@ -135,7 +135,6 @@ def hope():
         not_one_and_how = 'Not ' + str(copy)
         key_not_one= types.InlineKeyboardButton(text=not_one_and_how, callback_data='not_one')
         keyboard.add(key_not_one)
-        print('last check:', number_of_pages)
         if number_of_pages == 1:
             bot.send_message(chat_id, 'In your file 1 page')
         else:
@@ -143,7 +142,7 @@ def hope():
         x = int(number_of_pages) * copy
         str4ka= 'Are you sure you want to print ' + str(copy) + ' copy. Total ' + str(x) + ' pages of paper will be used'
         if x > 20:
-            bot.send_message(chat_id, 'Thats too much, change the file')
+            bot.send_message(chat_id, 'Thats too much, change the file. 20 pages thats your limit')
         else:
             bot.send_message(chat_id, text=str4ka, reply_markup=keyboard)
     def call():
@@ -168,11 +167,10 @@ def how_much(message):
     try:
         copy = int(message.text)
         if copy > 20 or copy < 1:
-            bot.send_message(message.chat.id, 'Wrong')
+            bot.send_message(message.chat.id, 'Wrong. Thats above 20 or less than 1. Try again')
             copy = 1
     except Exception:
-        bot.send_message(message.chat.id, 'Write in numbers please')
-    print('First check:', copy)
+        bot.send_message(message.chat.id, 'Write in numbers please and without float numbers')
     hope()               #Calling Inline Keyboard to ask again after checking number of copies
 
 
