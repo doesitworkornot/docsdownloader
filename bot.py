@@ -214,4 +214,14 @@ def DB(message):
 
 
 ############# JUST VIBING ################
-bot.polling()               #Equal Bot working while True
+try:
+    bot.polling(none_stop=True)
+
+# ConnectionError and ReadTimeout because of possible timout of the requests library
+
+# TypeError for moviepy errors
+
+# maybe there are others, therefore Exception
+
+except Exception as e:
+    time.sleep(15)
