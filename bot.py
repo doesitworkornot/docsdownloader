@@ -214,14 +214,5 @@ def DB(message):
 
 
 ############# JUST VIBING ################
-try:
-    bot.polling(none_stop=True)
-
-# ConnectionError and ReadTimeout because of possible timout of the requests library
-
-# TypeError for moviepy errors
-
-# maybe there are others, therefore Exception
-
-except Exception as e:
-    time.sleep(15)
+if __name__ == '__main__':
+    bot.infinity_polling(True)
