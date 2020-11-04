@@ -78,6 +78,11 @@ def notalloweduser(message):                            #When user is not regist
     DB(message)
 
 
+############# NEED TO PAY ################
+def needtopay(message, available_pages):
+    str = 'In your account ' + str(available_pages) + 'available pages to print left'
+    bot.send_message(message.chat.id, str)
+
 
 
 '''#########################################################################
@@ -92,6 +97,8 @@ mssg_id = ''
 copy = 1
 chat_id = ''
 number_of_pages = 1
+available_pages = 0
+x = 1
 
 
 ############# FILE CHECK ################
@@ -106,6 +113,14 @@ def handle_docs(message):
     sql.execute(sqlstr % userid)
     if sql.fetchone() is None:                              #Checking in DB is registred?
         notalloweduser(message)
+    sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = %s"
+    sql.execute(sqlstr % userid)
+    global available_pages
+    available_pages = sql.fetchone()
+    available_pages = ''.join(str(x) for x in available_pages)
+    available_pages = int(available_pages)
+    if available_pages <= 0:
+        needtopay(message, available_pages)
     else:
         global document_id
         global mssg_id
@@ -125,32 +140,55 @@ def handle_docs(message):
 def hope():
     def areusure():
         global number_of_pages
-        keyboard = types.InlineKeyboardMarkup()
-        key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
-        keyboard.add(key_yes)
-        key_no= types.InlineKeyboardButton(text='No', callback_data='no')
-        keyboard.add(key_no)
-        global copy
-        global chat_id
-        not_one_and_how = 'Not ' + str(copy)
-        key_not_one= types.InlineKeyboardButton(text=not_one_and_how, callback_data='not_one')
-        keyboard.add(key_not_one)
-        if number_of_pages == 1:
-            bot.send_message(chat_id, 'In your file 1 page')
+        global available_pages
+        if number_of_pages > available_pages:
+            notenoughpages(number_of_pages, available_pages)
         else:
-            bot.send_message(chat_id, 'in your file %s pages' % str(number_of_pages))
-        x = int(number_of_pages) * copy
-        str4ka= 'Are you sure you want to print ' + str(copy) + ' copy. Total ' + str(x) + ' pages of paper will be used'
-        if x > 20:
-            bot.send_message(chat_id, 'Thats too much, change the file. 20 pages thats your limit')
-        else:
-            bot.send_message(chat_id, text=str4ka, reply_markup=keyboard)
+            keyboard = types.InlineKeyboardMarkup()
+            key_yes = types.InlineKeyboardButton(text='Yes', callback_data='yes')
+            keyboard.add(key_yes)
+            key_no= types.InlineKeyboardButton(text='No', callback_data='no')
+            keyboard.add(key_no)
+            global copy
+            global chat_id
+            global x
+            not_one_and_how = 'Not ' + str(copy)
+            key_not_one= types.InlineKeyboardButton(text=not_one_and_how, callback_data='not_one')
+            keyboard.add(key_not_one)
+            if number_of_pages == 1:
+                bot.send_message(chat_id, 'In your file 1 page')
+            else:
+                bot.send_message(chat_id, 'in your file %s pages' % str(number_of_pages))
+            x = int(number_of_pages) * copy
+            str4ka= 'Are you sure you want to print ' + str(copy) + ' copy. Total ' + str(x) + ' pages of paper will be used'
+            if x > available_pages:
+                bot.send_message(chat_id, 'Thats too much, change the file. %s pages thats your limit' % available_pages)
+            else:
+                bot.send_message(chat_id, text=str4ka, reply_markup=keyboard)
     def call():
         @bot.callback_query_handler(func=lambda call: True)
         def callback_worker(call):
             bot.delete_message(call.message.chat.id, call.message.message_id)
             if call.data == 'yes':
                 bot.send_message(chat_id, 'Success. You did it')
+                try:
+                    global x
+                    global available_pages
+                    user_id = str(call.message.from_user.id)
+                    conn = sqlite3.connect('/telebot/pplids.sqlite')
+                    sql = conn.cursor()
+                    after = str(available_pages - x)
+                    newsql = "UPDATE ppls SET AvailablePages = ? WHERE ID = ?"
+                    sql.execute(newsql (available_pages, user_id))
+                    conn.commit()
+                    sql.close()
+                    print(after)
+                except sqlite3.Error as error:
+                    print("Failed to update sqlite table", error)
+                finally:
+                    if (conn):
+                        conn.close()
+                        print("The sqlite connection is closed")
                 print('Тут должен быть вызов на печать')
             elif call.data == 'no':
                 bot.send_message(call.message.chat.id, 'Ok then')
@@ -164,10 +202,11 @@ def hope():
 ############# HOW MUCH ################
 def how_much(message):
     global copy
+    global available_pages
     try:
         copy = int(message.text)
-        if copy > 20 or copy < 1:
-            bot.send_message(message.chat.id, 'Wrong. Thats above 20 or less than 1. Try again')
+        if copy > available_pages or copy < 1:
+            bot.send_message(message.chat.id, 'Wrong. This is more than i can let you or less than 1. Try again')
             copy = 1
     except Exception:
         bot.send_message(message.chat.id, 'Write in numbers please and without float numbers')
