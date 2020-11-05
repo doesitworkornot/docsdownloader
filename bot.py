@@ -115,6 +115,7 @@ def handle_docs(message):
         notalloweduser(message)
     else:
         sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = %s"
+        print(userid)
         sql.execute(sqlstr % userid)
         global available_pages
         available_pages = sql.fetchone()
@@ -177,7 +178,8 @@ def hope():
                 try:
                     global x
                     global available_pages
-                    user_id = str(call.message.from_user.id)
+                    user_id = str(call.from_user.id)
+                    print(user_id)
                     conn = sqlite3.connect('/telebot/pplids.sqlite')
                     sql = conn.cursor()
                     after = str(available_pages - x)
