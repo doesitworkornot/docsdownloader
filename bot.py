@@ -113,27 +113,30 @@ def handle_docs(message):
     sql.execute(sqlstr % userid)
     if sql.fetchone() is None:                              #Checking in DB is registred?
         notalloweduser(message)
-    sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = %s"
-    sql.execute(sqlstr % userid)
-    global available_pages
-    available_pages = sql.fetchone()
-    available_pages = ''.join(str(x) for x in available_pages)
-    available_pages = int(available_pages)
-    if available_pages <= 0:
-        needtopay(message, available_pages)
     else:
-        global document_id
-        global mssg_id
-        global chat_id
-        chat_id = message.chat.id
-        mssg_id = message.message_id
-        document_id = message.document.file_id
-        file_info = bot.get_file(document_id)
-        useless, file_extension = os.path.splitext(file_info.file_path)
-        if file_extension not in cfg.allowedfiles:            #Is file unsupported
-            wrong_extension(file_extension, message)
+        sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = %s"
+        sql.execute(sqlstr % userid)
+        global available_pages
+        available_pages = sql.fetchone()
+        print('До преобразования: ', available_pages)
+        available_pages = ''.join(str(x) for x in available_pages)
+        available_pages = int(available_pages)
+        print('После: ', available_pages)
+        if available_pages <= 0:
+            needtopay(message, available_pages)
         else:
-            download()                                              #User opinion
+            global document_id
+            global mssg_id
+            global chat_id
+            chat_id = message.chat.id
+            mssg_id = message.message_id
+            document_id = message.document.file_id
+            file_info = bot.get_file(document_id)
+            useless, file_extension = os.path.splitext(file_info.file_path)
+            if file_extension not in cfg.allowedfiles:            #Is file unsupported
+                wrong_extension(file_extension, message)
+            else:
+                download()                                              #User opinion
 
 
 ############# CALLBACK AND Q TO USER ################
@@ -178,9 +181,14 @@ def hope():
                     conn = sqlite3.connect('/telebot/pplids.sqlite')
                     sql = conn.cursor()
                     after = str(available_pages - x)
-                    newsql = "UPDATE ppls SET AvailablePages = ? WHERE ID = ?"
-                    sql.execute(newsql (available_pages, user_id))
+                    newsql = "UPDATE ppls SET AvailablePages = %s WHERE ID = %s"
+                    data = (after, user_id)
+                    sql.execute(newsql % data)
                     conn.commit()
+                    checksql = "SELECT AvailablePages FROM ppls WHERE ID = %s"
+                    sql.execute(checksql % user_id)
+                    check_print = sql.fetchone()
+                    print('После апдейта: ', check_print)
                     sql.close()
                     print(after)
                 except sqlite3.Error as error:
