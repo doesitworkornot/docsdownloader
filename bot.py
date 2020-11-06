@@ -13,6 +13,11 @@ bot = telebot.TeleBot(cfg.token)
 '''#########################################################################
                         COMMANDS
 #########################################################################'''
+new_first_name = ''
+new_last_name = ''
+new_year_of_birth = 0
+new_user_id = 0
+
 
 
 
@@ -21,6 +26,84 @@ bot = telebot.TeleBot(cfg.token)
 def start(message):
     hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is checking all files and printing them in the scool. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored. Nothing personal :) Thats Telegram restriction. \n     You can print only 20 pages of paper, so check it before sending the file and make sure that you understand what are you printing.\n Before you need to register that helps us to know who are using scool paper. To start you just need to send file to bot thats all. To see commands list send /help  \n \nI hope you'll enjoy"
     bot.send_message(message.chat.id, hi_message)
+
+
+    ############# ADMIN LIST ################
+@bot.message_handler(commands=['addnewuser'])
+def addnewuser(message):
+    userid = str(message.from_user.id)
+    conn = sqlite3.connect('pplids.sqlite')
+    sql = conn.cursor()
+    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
+    if sql.fetchone()[0] == 'True':
+        msg = bot.send_message(message.chat.id, 'Ok send me his first name')
+        bot.register_next_step_handler(msg, new_user_first_name)
+    else:
+        bot.send_message(message.chat.id, 'You are not ADMIN')
+
+
+        ############# ADDING FIRST NAME ################
+def new_user_first_name(message):
+    first_name = message.text
+    if not first_name.isdigit():
+        global new_first_name
+        new_first_name = first_name
+        msg = bot.send_message(message.chat.id, 'Now second name')
+        bot.register_next_step_handler(msg, new_user_last_name)
+    else:
+        msg = bot.send_message(message.chat.id, 'Name should be text like. Try again')
+        bot.register_next_step_handler(msg, new_user_first_name)
+
+
+def new_user_last_name(message):
+    last_name = message.text
+    if not first_name.isdigit():
+        global new_last_name
+        new_last_name = last_name
+        msg = bot.send_message(message.chat.id, 'Year of birth')
+        bot.register_next_step_handler(msg, new_user_year_of_birth)
+
+
+def new_user_year_of_birth(message):
+    year_of_birth = message.text
+    print(year_of_birth)
+    if first_name.isdigit():
+        global new_year_of_birth
+        new_year_of_birth = year_of_birth
+        msg = bot.send_message(message.chat.id, 'And forward message from new user')
+        bot.register_next_step_handler(msg, forwarded_message)
+
+
+def forwarded_message(message):
+    new_id = message.forward_from
+    if new_id is None:
+        msg = bot.send_message(message.chat.id, 'Forward message from new user. Try again')
+        bot.register_next_step_handler(msg, forwarded_message)
+    else:
+        global new_first_name
+        global new_last_name
+        global new_year_of_birth
+        global new_user_id
+        new_user_id = new_id
+        print_str = new_first_name + ' ' + new_last_name + ' ' + str(new_year_of_birth) + 'Print y/n'
+        msg = bot.send_message(message.chat.id, print_str)
+        bot.register_next_step_handler(msg, are_u_sure_want_to_add_new_user)
+
+
+def are_u_sure_want_to_add_new_user(message):
+    y_n = message.text
+    if text.lower == 'y':
+        global new_first_name
+        global new_last_name
+        global new_year_of_birth
+        global new_user_id
+        print('вызов на запись в бд')
+    elif text.lower == 'n':
+        bot.send_message(message.chat.it, 'Nice try')
+    else:
+        msg = bot.send_message(message.chat.id, 'Try again. soo...')
+        bot.register_next_step_handler(msg, are_u_sure_want_to_add_new_user)
+
 
 
     ############# ADMIN LIST ################
@@ -59,6 +142,7 @@ def idk(message):
 @bot.message_handler(content_types=['photo'])           #When user sends photo to bot
 def issue(message):
     bot.send_message(message.chat.id, 'Am i joke to you? You should send me FILE')
+    print(message)
 
 
 ############# NOT SUPPORTS ################
