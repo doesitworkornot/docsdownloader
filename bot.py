@@ -98,6 +98,12 @@ def are_u_sure_want_to_add_new_user(message):
         global new_year_of_birth
         global new_user_id
         print('вызов на запись в бд')
+        conn = sqlite3.connect('pplids.sqlite')
+        sql = conn.cursor()
+        sql_str = "INSERT INTO ppls(FirstName,LastName,YearOfBirth,ID,Admin,AvailablePages) VALUES(?,?,?,?,'False',100)"
+        data = (new_first_name, new_last_name, new_year_of_birth, new_user_id)
+        sql.execute(sql_str, data)
+        conn.commit()
     elif text.lower == 'n':
         bot.send_message(message.chat.it, 'Nice try')
     else:
@@ -112,7 +118,7 @@ def userlist(message):
     userid = str(message.from_user.id)
     conn = sqlite3.connect('pplids.sqlite')
     sql = conn.cursor()
-    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
+    sql.execute("SELECT Admin FROM ppls WHERE ID = ?",  userid)
     if sql.fetchone()[0] == 'True':                 #Admin check with DB
         bot.send_message(message.chat.id, 'Ok there is names of users soo')
         sql.execute("SELECT * FROM ppls")
@@ -192,15 +198,15 @@ def handle_docs(message):
         toobig(message)
     conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
-    sqlstr = "SELECT * FROM ppls WHERE ID = %s"
+    sqlstr = "SELECT * FROM ppls WHERE ID = ?"
     userid = str(message.from_user.id)
-    sql.execute(sqlstr % userid)
+    sql.execute(sqlstr, userid)
     if sql.fetchone() is None:                              #Checking in DB is registred?
         notalloweduser(message)
     else:
-        sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = %s"
+        sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = ?"
         print(userid)
-        sql.execute(sqlstr % userid)
+        sql.execute(sqlstr, userid)
         global available_pages
         available_pages = sql.fetchone()
         print('До преобразования: ', available_pages)
@@ -267,16 +273,11 @@ def hope():
                     conn = sqlite3.connect('/telebot/pplids.sqlite')
                     sql = conn.cursor()
                     after = str(available_pages - x)
-                    newsql = "UPDATE ppls SET AvailablePages = %s WHERE ID = %s"
+                    newsql = "UPDATE ppls SET AvailablePages = ? WHERE ID = ?"
                     data = (after, user_id)
-                    sql.execute(newsql % data)
+                    sql.execute(newsql, data)
                     conn.commit()
-                    checksql = "SELECT AvailablePages FROM ppls WHERE ID = %s"
-                    sql.execute(checksql % user_id)
-                    check_print = sql.fetchone()
-                    print('После апдейта: ', check_print)
                     sql.close()
-                    print(after)
                 except sqlite3.Error as error:
                     print("Failed to update sqlite table", error)
                 finally:
