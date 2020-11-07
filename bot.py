@@ -28,13 +28,13 @@ def start(message):
     bot.send_message(message.chat.id, hi_message)
 
 
-    ############# ADMIN LIST ################
+    ############# ADD NEW USER ################
 @bot.message_handler(commands=['addnewuser'])
 def addnewuser(message):
     userid = str(message.from_user.id)
     conn = sqlite3.connect('pplids.sqlite')
     sql = conn.cursor()
-    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
+    sql.execute("SELECT Admin FROM ppls WHERE ID = ?", userid)
     if sql.fetchone()[0] == 'True':
         msg = bot.send_message(message.chat.id, 'Ok send me his first name')
         bot.register_next_step_handler(msg, new_user_first_name)
@@ -42,7 +42,7 @@ def addnewuser(message):
         bot.send_message(message.chat.id, 'You are not ADMIN')
 
 
-        ############# ADDING FIRST NAME ################
+    ############# ADDING FIRST NAME ################
 def new_user_first_name(message):
     first_name = message.text
     if not first_name.isdigit():
@@ -55,6 +55,7 @@ def new_user_first_name(message):
         bot.register_next_step_handler(msg, new_user_first_name)
 
 
+    ############# ADDING LAST NAME ################
 def new_user_last_name(message):
     last_name = message.text
     if not first_name.isdigit():
@@ -64,6 +65,7 @@ def new_user_last_name(message):
         bot.register_next_step_handler(msg, new_user_year_of_birth)
 
 
+    ############# ADDING YEAR OF BIRTH ################
 def new_user_year_of_birth(message):
     year_of_birth = message.text
     print(year_of_birth)
@@ -74,6 +76,7 @@ def new_user_year_of_birth(message):
         bot.register_next_step_handler(msg, forwarded_message)
 
 
+    ############# ASKING FOR NEW USER ID ################
 def forwarded_message(message):
     new_id = message.forward_from
     if new_id is None:
@@ -90,6 +93,7 @@ def forwarded_message(message):
         bot.register_next_step_handler(msg, are_u_sure_want_to_add_new_user)
 
 
+    ############# ADDING TO DB ################
 def are_u_sure_want_to_add_new_user(message):
     y_n = message.text
     if text.lower == 'y':
