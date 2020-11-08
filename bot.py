@@ -32,9 +32,9 @@ def start(message):
 @bot.message_handler(commands=['addnewuser'])
 def addnewuser(message):
     userid = str(message.from_user.id)
-    conn = sqlite3.connect('pplids.sqlite')
+    conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
-    sql.execute("SELECT Admin FROM ppls WHERE ID = ?", userid)
+    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
     if sql.fetchone()[0] == 'True':
         msg = bot.send_message(message.chat.id, 'Ok send me his first name')
         bot.register_next_step_handler(msg, new_user_first_name)
@@ -48,7 +48,7 @@ def new_user_first_name(message):
     if not first_name.isdigit():
         global new_first_name
         new_first_name = first_name
-        msg = bot.send_message(message.chat.id, 'Now second name')
+        msg = bot.send_message(message.chat.id, 'Now last name')
         bot.register_next_step_handler(msg, new_user_last_name)
     else:
         msg = bot.send_message(message.chat.id, 'Name should be text like. Try again')
@@ -58,27 +58,32 @@ def new_user_first_name(message):
     ############# ADDING LAST NAME ################
 def new_user_last_name(message):
     last_name = message.text
-    if not first_name.isdigit():
+    if not last_name.isdigit():
         global new_last_name
         new_last_name = last_name
         msg = bot.send_message(message.chat.id, 'Year of birth')
         bot.register_next_step_handler(msg, new_user_year_of_birth)
+    else:
+        msg = bot.send_message(message.chat.id, 'Name should be text like. Try again')
+        bot.register_next_step_handler(msg, new_user_last_name)
 
 
     ############# ADDING YEAR OF BIRTH ################
 def new_user_year_of_birth(message):
     year_of_birth = message.text
-    print(year_of_birth)
-    if first_name.isdigit():
+    if year_of_birth.isdigit():
         global new_year_of_birth
         new_year_of_birth = year_of_birth
         msg = bot.send_message(message.chat.id, 'And forward message from new user')
         bot.register_next_step_handler(msg, forwarded_message)
+    else:
+        msg = bot.send_message(message.chat.id, 'Year should be like 1999. Try again')
+        bot.register_next_step_handler(msg, new_user_year_of_birth)
 
 
     ############# ASKING FOR NEW USER ID ################
 def forwarded_message(message):
-    new_id = message.forward_from
+    new_id = message.forward_from.id
     if new_id is None:
         msg = bot.send_message(message.chat.id, 'Forward message from new user. Try again')
         bot.register_next_step_handler(msg, forwarded_message)
@@ -88,7 +93,7 @@ def forwarded_message(message):
         global new_year_of_birth
         global new_user_id
         new_user_id = new_id
-        print_str = new_first_name + ' ' + new_last_name + ' ' + str(new_year_of_birth) + 'Print y/n'
+        print_str = new_first_name + ' ' + new_last_name + ' ' + str(new_year_of_birth) + ' Print y/n'
         msg = bot.send_message(message.chat.id, print_str)
         bot.register_next_step_handler(msg, are_u_sure_want_to_add_new_user)
 
@@ -96,19 +101,22 @@ def forwarded_message(message):
     ############# ADDING TO DB ################
 def are_u_sure_want_to_add_new_user(message):
     y_n = message.text
-    if text.lower == 'y':
+    if y_n.lower() == 'y':
         global new_first_name
         global new_last_name
         global new_year_of_birth
         global new_user_id
         print('вызов на запись в бд')
-        conn = sqlite3.connect('pplids.sqlite')
+        conn = sqlite3.connect('/telebot/pplids.sqlite')
         sql = conn.cursor()
-        sql_str = "INSERT INTO ppls(FirstName,LastName,YearOfBirth,ID,Admin,AvailablePages) VALUES(?,?,?,?,'False',100)"
-        data = (new_first_name, new_last_name, new_year_of_birth, new_user_id)
+        sql_str = "INSERT INTO ppls(FirstName, LastName, YearOfBirth, ID, Admin, AvailablePages) VALUES(?, ?, ?, ?, ?, ?);"
+        false = "False"
+        data = (new_first_name, new_last_name, str(new_year_of_birth), new_user_id, false, "100")
+        print(data)
         sql.execute(sql_str, data)
         conn.commit()
-    elif text.lower == 'n':
+        bot.send_message(message.chat.id, 'Oh. You are welcome')
+    elif y_n.lower() == 'n':
         bot.send_message(message.chat.it, 'Nice try')
     else:
         msg = bot.send_message(message.chat.id, 'Try again. soo...')
@@ -120,9 +128,9 @@ def are_u_sure_want_to_add_new_user(message):
 @bot.message_handler(commands=['userlist'])         #When user writes /uesrlist to bot
 def userlist(message):
     userid = str(message.from_user.id)
-    conn = sqlite3.connect('pplids.sqlite')
+    conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
-    sql.execute("SELECT Admin FROM ppls WHERE ID = ?",  userid)
+    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
     if sql.fetchone()[0] == 'True':                 #Admin check with DB
         bot.send_message(message.chat.id, 'Ok there is names of users soo')
         sql.execute("SELECT * FROM ppls")
@@ -174,7 +182,7 @@ def notalloweduser(message):                            #When user is not regist
 
 ############# NEED TO PAY ################
 def needtopay(message, available_pages):
-    str = 'In your account ' + str(available_pages) + 'available pages to print left'
+    str = 'In your account ' + str(available_pages) + ' available pages to print left'
     bot.send_message(message.chat.id, str)
 
 
@@ -202,15 +210,15 @@ def handle_docs(message):
         toobig(message)
     conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
-    sqlstr = "SELECT * FROM ppls WHERE ID = ?"
+    sqlstr = "SELECT * FROM ppls WHERE ID = %s"
     userid = str(message.from_user.id)
-    sql.execute(sqlstr, userid)
+    sql.execute(sqlstr % userid)
     if sql.fetchone() is None:                              #Checking in DB is registred?
         notalloweduser(message)
     else:
-        sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = ?"
+        sqlstr = "SELECT AvailablePages FROM ppls WHERE ID = %s"
         print(userid)
-        sql.execute(sqlstr, userid)
+        sql.execute(sqlstr % userid)
         global available_pages
         available_pages = sql.fetchone()
         print('До преобразования: ', available_pages)
@@ -277,9 +285,9 @@ def hope():
                     conn = sqlite3.connect('/telebot/pplids.sqlite')
                     sql = conn.cursor()
                     after = str(available_pages - x)
-                    newsql = "UPDATE ppls SET AvailablePages = ? WHERE ID = ?"
+                    newsql = "UPDATE ppls SET AvailablePages = %s WHERE ID = %s"
                     data = (after, user_id)
-                    sql.execute(newsql, data)
+                    sql.execute(newsql % data)
                     conn.commit()
                     sql.close()
                 except sqlite3.Error as error:
