@@ -138,7 +138,7 @@ def userlist(message):
         for row in res:
             bot.send_message(message.chat.id, row)
     elif sql.fetchone()[0] == 'False':
-        bot.send_message(message.chat.id, 'You are not admin. So make your bet to solve this problem')
+        bot.send_message(message.chat.id, 'You are not admin. So make your best to solve this problem')
     else:
         bot.send_message(message.chat.id, 'Some problems with access idk what to do')
 
