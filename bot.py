@@ -13,6 +13,11 @@ bot = telebot.TeleBot(cfg.token)
 '''#########################################################################
                         COMMANDS
 #########################################################################'''
+new_first_name = ''
+new_last_name = ''
+new_year_of_birth = 0
+new_user_id = 0
+
 
 
 
@@ -23,11 +28,107 @@ def start(message):
     bot.send_message(message.chat.id, hi_message)
 
 
+    ############# ADD NEW USER ################
+@bot.message_handler(commands=['addnewuser'])
+def addnewuser(message):
+    userid = str(message.from_user.id)
+    conn = sqlite3.connect('/telebot/pplids.sqlite')
+    sql = conn.cursor()
+    sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
+    if sql.fetchone()[0] == 'True':
+        msg = bot.send_message(message.chat.id, 'Ok send me his first name')
+        bot.register_next_step_handler(msg, new_user_first_name)
+    else:
+        bot.send_message(message.chat.id, 'You are not ADMIN')
+
+
+    ############# ADDING FIRST NAME ################
+def new_user_first_name(message):
+    first_name = message.text
+    if not first_name.isdigit():
+        global new_first_name
+        new_first_name = first_name
+        msg = bot.send_message(message.chat.id, 'Now last name')
+        bot.register_next_step_handler(msg, new_user_last_name)
+    else:
+        msg = bot.send_message(message.chat.id, 'Name should be text like. Try again')
+        bot.register_next_step_handler(msg, new_user_first_name)
+
+
+    ############# ADDING LAST NAME ################
+def new_user_last_name(message):
+    last_name = message.text
+    if not last_name.isdigit():
+        global new_last_name
+        new_last_name = last_name
+        msg = bot.send_message(message.chat.id, 'Year of birth')
+        bot.register_next_step_handler(msg, new_user_year_of_birth)
+    else:
+        msg = bot.send_message(message.chat.id, 'Name should be text like. Try again')
+        bot.register_next_step_handler(msg, new_user_last_name)
+
+
+    ############# ADDING YEAR OF BIRTH ################
+def new_user_year_of_birth(message):
+    year_of_birth = message.text
+    if year_of_birth.isdigit():
+        global new_year_of_birth
+        new_year_of_birth = year_of_birth
+        msg = bot.send_message(message.chat.id, 'And forward message from new user')
+        bot.register_next_step_handler(msg, forwarded_message)
+    else:
+        msg = bot.send_message(message.chat.id, 'Year should be like 1999. Try again')
+        bot.register_next_step_handler(msg, new_user_year_of_birth)
+
+
+    ############# ASKING FOR NEW USER ID ################
+def forwarded_message(message):
+    new_id = message.forward_from.id
+    if new_id is None:
+        msg = bot.send_message(message.chat.id, 'Forward message from new user. Try again')
+        bot.register_next_step_handler(msg, forwarded_message)
+    else:
+        global new_first_name
+        global new_last_name
+        global new_year_of_birth
+        global new_user_id
+        new_user_id = new_id
+        print_str = new_first_name + ' ' + new_last_name + ' ' + str(new_year_of_birth) + ' Print y/n'
+        msg = bot.send_message(message.chat.id, print_str)
+        bot.register_next_step_handler(msg, are_u_sure_want_to_add_new_user)
+
+
+    ############# ADDING TO DB ################
+def are_u_sure_want_to_add_new_user(message):
+    y_n = message.text
+    if y_n.lower() == 'y':
+        global new_first_name
+        global new_last_name
+        global new_year_of_birth
+        global new_user_id
+        print('вызов на запись в бд')
+        conn = sqlite3.connect('/telebot/pplids.sqlite')
+        sql = conn.cursor()
+        sql_str = "INSERT INTO ppls(FirstName, LastName, YearOfBirth, ID, Admin, AvailablePages) VALUES(?, ?, ?, ?, ?, ?);"
+        false = "False"
+        data = (new_first_name, new_last_name, str(new_year_of_birth), new_user_id, false, "100")
+        print(data)
+        sql.execute(sql_str, data)
+        conn.commit()
+        bot.send_message(message.chat.id, 'Oh. You are welcome')
+    elif y_n.lower() == 'n':
+        bot.send_message(message.chat.it, 'Nice try')
+    else:
+        msg = bot.send_message(message.chat.id, 'Try again. soo...')
+        bot.register_next_step_handler(msg, are_u_sure_want_to_add_new_user)
+
+
+
     ############# ADMIN LIST ################
 @bot.message_handler(commands=['userlist'])         #When user writes /uesrlist to bot
 def userlist(message):
     userid = str(message.from_user.id)
-    conn = sqlite3.connect('pplids.sqlite')
+    conn = sqlite3.connect('/telebot/pplids.sqlite')
     sql = conn.cursor()
     sql.execute("SELECT Admin FROM ppls WHERE ID = %s" % userid)
     if sql.fetchone()[0] == 'True':                 #Admin check with DB
@@ -37,7 +138,7 @@ def userlist(message):
         for row in res:
             bot.send_message(message.chat.id, row)
     elif sql.fetchone()[0] == 'False':
-        bot.send_message(message.chat.id, 'You are not admin. So make your bet to solve this problem')
+        bot.send_message(message.chat.id, 'You are not admin. So make your best to solve this problem')
     else:
         bot.send_message(message.chat.id, 'Some problems with access idk what to do')
 
@@ -59,6 +160,7 @@ def idk(message):
 @bot.message_handler(content_types=['photo'])           #When user sends photo to bot
 def issue(message):
     bot.send_message(message.chat.id, 'Am i joke to you? You should send me FILE')
+    print(message)
 
 
 ############# NOT SUPPORTS ################
@@ -80,7 +182,7 @@ def notalloweduser(message):                            #When user is not regist
 
 ############# NEED TO PAY ################
 def needtopay(message, available_pages):
-    str = 'In your account ' + str(available_pages) + 'available pages to print left'
+    str = 'In your account ' + str(available_pages) + ' available pages to print left'
     bot.send_message(message.chat.id, str)
 
 
@@ -187,12 +289,7 @@ def hope():
                     data = (after, user_id)
                     sql.execute(newsql % data)
                     conn.commit()
-                    checksql = "SELECT AvailablePages FROM ppls WHERE ID = %s"
-                    sql.execute(checksql % user_id)
-                    check_print = sql.fetchone()
-                    print('После апдейта: ', check_print)
                     sql.close()
-                    print(after)
                 except sqlite3.Error as error:
                     print("Failed to update sqlite table", error)
                 finally:
@@ -264,4 +361,7 @@ def DB(message):
 
 ############# JUST VIBING ################
 if __name__ == '__main__':
-    bot.infinity_polling(True)
+    try:
+        bot.infinity_polling(True)
+    except:
+        bot = telebot.TeleBot(cfg.token)
