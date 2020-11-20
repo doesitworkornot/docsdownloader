@@ -198,6 +198,7 @@ document_id = ''
 mssg_id = ''
 copy = 1
 chat_id = ''
+pdf_file_path = ''
 number_of_pages = 1
 available_pages = 0
 x = 1
@@ -296,7 +297,7 @@ def hope():
                     if (conn):
                         conn.close()
                         print("The sqlite connection is closed")
-                print('Тут должен быть вызов на печать')
+                printthat()
             elif call.data == 'no':
                 bot.send_message(call.message.chat.id, 'Ok then')
             elif call.data == 'not_one':
@@ -342,6 +343,7 @@ def convertthat(file_path, file_name):
     traceback = subprocess.run(cmd, check=True)             #Converting file to PDF so printer can print that
     if traceback.returncode == 0:
         global number_of_pages
+        global pdf_file_path
         pdf_file_path = '/telebot/PDF/' + file_name + '.pdf'
         cmd_line = 'pdfinfo ' + pdf_file_path + ' | grep Pages | awk \'{print$2}\''
         number_of_pages = subprocess.Popen(cmd_line, shell=True, stdout=subprocess.PIPE, encoding='utf-8').communicate()[0]   #Number of pages is finally there
@@ -349,6 +351,13 @@ def convertthat(file_path, file_name):
         hope()
     else:                   #Non zero val == Err
         print('not good yet:', traceback)
+
+
+############# SENDING FILE TO THE PRINTER ################
+def printthat():
+    global pdf_file_path
+    cmd = ['lp', pdf_file_path]
+    subprocess.run(cmd)
 
 
 ############# LOG ################
