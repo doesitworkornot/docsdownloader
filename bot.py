@@ -361,4 +361,7 @@ def DB(message):
 
 ############# JUST VIBING ################
 if __name__ == '__main__':
-    bot.infinity_polling(True)
+    try:
+        bot.infinity_polling(True)
+    except:
+        bot = telebot.TeleBot(cfg.token)
