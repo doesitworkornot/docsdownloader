@@ -369,7 +369,5 @@ def DB(message):
 
 
 ############# JUST VIBING ################
-try:
-    bot.infinity_polling(True)
-except:
-    bot = telebot.TeleBot(cfg.token)
+
+bot.infinity_polling(True)
