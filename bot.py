@@ -21,7 +21,7 @@ new_user_id = 0
 
 
 
-    ############# START COMMAND ################
+    ############## START COMMAND ################
 @bot.message_handler(commands=['start'])            #When user writes /start to bot
 def start(message):
     hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is checking all files and printing them in the scool. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored. Nothing personal :) Thats Telegram restriction. \n     You can print only 20 pages of paper, so check it before sending the file and make sure that you understand what are you printing.\n Before you need to register that helps us to know who are using scool paper. To start you just need to send file to bot thats all. To see commands list send /help  \n \nI hope you'll enjoy"
