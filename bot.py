@@ -21,7 +21,7 @@ new_user_id = 0
 
 
 
-    ############# START COMMAND ################
+    ############## START COMMAND ################
 @bot.message_handler(commands=['start'])            #When user writes /start to bot
 def start(message):
     hi_message = 'Hi '+ str(message.from_user.username) + "! \n \n This bot is checking all files and printing them in the scool. \n !important You need to send all files as files max file size = 20mb! or You\'ll be ignored. Nothing personal :) Thats Telegram restriction. \n     You can print only 20 pages of paper, so check it before sending the file and make sure that you understand what are you printing.\n Before you need to register that helps us to know who are using scool paper. To start you just need to send file to bot thats all. To see commands list send /help  \n \nI hope you'll enjoy"
@@ -177,7 +177,7 @@ def toobig(message):                                    #When user sends too big
 ############# NEED TO REGISTER ################
 def notalloweduser(message):                            #When user is not registred in DB
     bot.send_message(message.chat.id, 'You need to login IRL :) Just check /start command')
-    DB(message)
+
 
 
 ############# NEED TO PAY ################
@@ -357,7 +357,7 @@ def convertthat(file_path, file_name):
 def printthat():
     global pdf_file_path
     cmd = ['lp', pdf_file_path]
-    subprocess.run(cmd)
+    print(cmd)
 
 
 ############# LOG ################
@@ -369,7 +369,5 @@ def DB(message):
 
 
 ############# JUST VIBING ################
-try:
-    bot.infinity_polling(True)
-except:
-    bot = telebot.TeleBot(cfg.token)
+
+bot.infinity_polling(True)
