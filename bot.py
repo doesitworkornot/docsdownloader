@@ -177,7 +177,7 @@ def toobig(message):                                    #When user sends too big
 ############# NEED TO REGISTER ################
 def notalloweduser(message):                            #When user is not registred in DB
     bot.send_message(message.chat.id, 'You need to login IRL :) Just check /start command')
-    DB(message)
+
 
 
 ############# NEED TO PAY ################
@@ -357,7 +357,7 @@ def convertthat(file_path, file_name):
 def printthat():
     global pdf_file_path
     cmd = ['lp', pdf_file_path]
-    subprocess.run(cmd)
+    print(cmd)
 
 
 ############# LOG ################
